@@ -1,8 +1,8 @@
 const { io } = require('../server');
-const { Users } = require('../classes/users')
-const { createMessage } = require('../utilities/utilities');
+const { Usuarios } = require('../classes/users')
+const { crearMensaje } = require('../utilities/utilities');
 
-const users = new Users;
+const usuarios = new Usuarios;
 
 io.on('connection', (client) => {
 
@@ -10,41 +10,44 @@ io.on('connection', (client) => {
 
     client.on('entrarChat', (data, callback) => {
 
-        if (!data.name || !data.room) {
+        if (!data.nombre || !data.sala) {
             return {
                 error: true,
-                message: 'El nombre o sala son necesarios'
+                mensaje: 'El nombre o sala son necesarios'
             }
         };
 
-        client.join(data.room);
+        client.join(data.sala);
 
-        users.addPerson(client.id, data.name, data.room)
-        client.broadcast.to(data.room).emit('listPeople', users.getPeoplePerRoom(data.room));
-
-        callback(users.getPeoplePerRoom(data.room));
+        usuarios.agregarPersona(client.id, data.nombre, data.sala)
+        client.broadcast.to(data.sala).emit('listarPersonas', usuarios.getPersonasPorSala(data.sala));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('', `${data.nombre} entro al chat`));
+        callback(usuarios.getPersonasPorSala(data.sala));
 
     });
 
-    client.on('createMessage', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
-        let person = users.getPerson(client.id)
+        let persona = usuarios.getPersona(client.id)
 
-        let message = createMessage(person.name, data.message);
+        let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
-        client.broadcast.to(person.room).emit('createMessage', message);
+        client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+
+        callback(mensaje);
     })
 
     client.on('disconnect', () => {
 
-        let deletedPerson = users.deletePerson(client.id);
+        let personaBorrada = usuarios.borrarPersona(client.id);
 
-        client.broadcast.to(deletedPerson.room).emit('createMessage', createMessage('Admin', `${deletedPerson.name} abandono el chat`));
-        client.broadcast.to(deletedPerson.room).emit('listPeople', users.getPeoplePerRoom(deletedPerson.room));
+        client.broadcast.to(personaBorrada.sala).emit('crearMensaje', crearMensaje('', `${personaBorrada.nombre} abandono el chat`));
+        client.broadcast.to(personaBorrada.sala).emit('listarPersonas', usuarios.getPersonasPorSala(personaBorrada.sala));
     });
 
-    client.on('privateMessage', data => {
-        let person = users.getPerson(client.id);
-        client.broadcast.to(data.for).emit('privateMessage', createMessage(person.name, data.message));
+    client.on('mensajePrivado', data => {
+        let persona = usuarios.getPersona(client.id);
+        client.broadcast.to(data.para).emit('mensajePrivado', crearMensaje(persona.nombre, data.mensaje));
     });
 });

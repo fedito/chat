@@ -1,38 +1,38 @@
-class Users {
+class Usuarios {
 
     constructor() {
-        this.people = [];
+        this.personas = [];
     };
 
-    addPerson(id, name, room) {
-        let person = { id, name, room };
-        this.people.push(person);
-        return this.people;
+    agregarPersona(id, nombre, sala) {
+        let persona = { id, nombre, sala };
+        this.personas.push(persona);
+        return this.personas;
     };
 
-    getPerson(id) {
-        let person = this.people.filter(person => person.id === id)[0];
-        return person;
+    getPersona(id) {
+        let persona = this.personas.filter(persona => persona.id === id)[0];
+        return persona;
     };
 
-    getPeople() {
-        return this.people
+    getPersonas() {
+        return this.personas
     };
 
-    getPeoplePerRoom(room) {
-        let roomPeople = this.people.filter(person => person.room === room);
-        return roomPeople;
+    getPersonasPorSala(sala) {
+        let salaPersonas = this.personas.filter(persona => persona.sala === sala);
+        return salaPersonas;
     };
 
-    deletePerson(id) {
-        let deletedPerson = this.getPerson(id);
-        this.people = this.people.filter(person => person.id != id);
-        return deletedPerson;
+    borrarPersona(id) {
+        let personaBorrada = this.getPersona(id);
+        this.personas = this.personas.filter(persona => persona.id != id);
+        return personaBorrada;
     };
 
 
 }
 
 module.exports = {
-    Users
+    Usuarios
 }
